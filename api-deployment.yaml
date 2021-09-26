@@ -13,9 +13,12 @@ spec:
     metadata:
       labels:
         app: api
+        tier: backend
+        track: stable
     spec:
       containers:
         - name: sandbox-api
           image: us-west1-docker.pkg.dev/sandbox-327103/sandbox-containers/sandbox_api
           ports:
             - containerPort: 80
+              name: http
