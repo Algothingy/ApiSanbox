@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sandbox-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: sandbox-api
+          image: us-west1-docker.pkg.dev/sandbox-327103/sandbox-containers/sandbox_api
+          ports:
+            - containerPort: 80
