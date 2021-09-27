@@ -22,3 +22,39 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          # Added for db connectivity
+          env:
+            - name: MYSQL_URL
+              value: jdbc:mysql://127.0.0.1:3306/sandbox_db
+            - name: MYSQL_APP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: username
+            - name: MYSQL_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt-secret
+        # Here comes the second container with the cloudsql proxy
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=sandbox-327103:us-central1:sandbox-api-db:sandbox_db=tcp:3306",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          securityContext:
+            runAsUser: 2 #non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - mountPath: /secrets/cloudsql #This actually lives in the container
+              name: cloudsql-instance-credentials
+              readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
